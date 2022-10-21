@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 async function main() {
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({ log: ["query", "info", "warn"] });
   await prisma.post.deleteMany({});
   await prisma.postWithoutUniqueConstraint.deleteMany({});
 
@@ -50,14 +50,15 @@ async function main() {
   );
   console.log({ concurrentPosts, concurrentPostsNoUniqueConstraint });
 
-  /* logs
-
-  {
-  concurrent: [ null, null ],
-  singleQuery: { id: 1, userId: 1, text: 'Hello, world!', deletedAt: null }
-  }
-
-  */
+  /* 
+ {
+  concurrentPosts: [ null, null ],
+  concurrentPostsNoUniqueConstraint: [
+    { id: 1, userId: 1, text: 'Hello, world!', deletedAt: null },
+    { id: 1, userId: 1, text: 'Hello, world!', deletedAt: null } 
+  ]
+}
+ */
 }
 
 main().catch((e) => console.error(e));
