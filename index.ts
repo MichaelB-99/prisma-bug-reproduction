@@ -3,7 +3,17 @@ import { PrismaClient } from "@prisma/client";
 async function main() {
   const prisma = new PrismaClient();
   await prisma.post.deleteMany({});
+  await prisma.postWithoutUniqueConstraint.deleteMany({});
+
   await prisma.post.create({
+    data: {
+      id: 1,
+      userId: 1,
+      text: "Hello, world!",
+    },
+  });
+
+  await prisma.postWithoutUniqueConstraint.create({
     data: {
       id: 1,
       userId: 1,
@@ -22,10 +32,23 @@ async function main() {
       },
     });
 
-  const singleQuery = await queryPost();
+  const queryPostWithoutUnique = () =>
+    prisma.postWithoutUniqueConstraint.findUnique({
+      where: {
+        id: 1,
+        userId: 1,
 
-  const concurrent = await Promise.all(Array.from({ length: 2 }, queryPost));
-  console.log({ concurrent, singleQuery });
+        deletedAt: null,
+      },
+    });
+
+  const concurrentPosts = await Promise.all(
+    Array.from({ length: 2 }, queryPost)
+  );
+  const concurrentPostsNoUniqueConstraint = await Promise.all(
+    Array.from({ length: 2 }, queryPostWithoutUnique)
+  );
+  console.log({ concurrentPosts, concurrentPostsNoUniqueConstraint });
 
   /* logs
 

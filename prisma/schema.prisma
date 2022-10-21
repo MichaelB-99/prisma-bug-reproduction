@@ -16,3 +16,10 @@ model Post {
 
   @@unique([id, userId])
 }
+
+model PostWithoutUniqueConstraint {
+  id        Int       @unique
+  userId    Int
+  text      String
+  deletedAt DateTime?
+}
